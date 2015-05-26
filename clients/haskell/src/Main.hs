@@ -38,22 +38,20 @@ main = scotty 8000 $ do
 
   post "/feedback" $ do
     b <- body
-    f <- case decode b of
-      Just x -> return x
-      Nothing -> fail "no feedback"
+    let f = decode b
 
-    trace (f :: Feedback)
+    trace (f :: Maybe Feedback)
     html "Thanx for this very usefull feedback"
 
   post "/order" $ do
     b <- body
-    o <- case decode b of
-      Just x -> return x
-      Nothing -> fail "no order"
 
-    trace (o :: Order)
+    let o = decode b
+    trace (o :: Maybe Order)
 
-    let answer = computeTotal o
+    let answer = case o of
+          Just x -> computeTotal x
+          Nothing -> Quantity 0
 
     trace answer
 
