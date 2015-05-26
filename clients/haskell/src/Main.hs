@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 import Data.Aeson
 import Data.Text
-import Data.Monoid
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad
-import Control.Monad.Trans (liftIO)
+import Control.Monad.Trans --(liftIO)
 import Web.Scotty
 import Model
 
@@ -17,8 +16,8 @@ instance FromJSON Order where
     (v .: "reduction")
 
 data Feedback = Feedback
-    { feedbackType :: Text
-    , content      :: Text
+    { _feedbackType :: Text
+    , _content      :: Text
     } deriving (Show)
 
 instance FromJSON Feedback where
@@ -43,7 +42,7 @@ main = scotty 8000 $ do
       Just x -> return x
       Nothing -> fail "no feedback"
 
-    liftIO $ print $ show (f :: Feedback)
+    trace $ show (f :: Feedback)
     html "Thanx for this very usefull feedback"
 
   post "/order" $ do
@@ -52,10 +51,13 @@ main = scotty 8000 $ do
       Just x -> return x
       Nothing -> fail "no order"
 
-    liftIO $ print $ show (o :: Order)
+    trace $ show (o :: Order)
 
     let answer = computeTotal o
 
-    liftIO $ print $ show answer
+    trace $ show answer
 
     raw $ encode $ answer
+
+trace :: MonadIO m => String -> m ()
+trace = liftIO . print
