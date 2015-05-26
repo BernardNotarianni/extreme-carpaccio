@@ -4,7 +4,7 @@ import Data.Text
 import Data.Monoid
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad
-import Control.Monad.Trans (liftIO)
+import Control.Monad.Trans
 import Web.Scotty
 import Model
 
@@ -43,7 +43,8 @@ main = scotty 8000 $ do
       Just x -> return x
       Nothing -> fail "no feedback"
 
-    liftIO $ print $ show (f :: Feedback)
+    trace (f :: Feedback)
+
     html "Thanx for this very usefull feedback"
 
   post "/order" $ do
@@ -52,10 +53,13 @@ main = scotty 8000 $ do
       Just x -> return x
       Nothing -> fail "no order"
 
-    liftIO $ print $ show (o :: Order)
+    trace (o :: Order)
 
     let answer = computeTotal o
 
-    liftIO $ print $ show answer
+    trace answer
 
     raw $ encode $ answer
+
+trace :: (Show a, MonadIO m) => a -> m ()
+trace = liftIO . print
