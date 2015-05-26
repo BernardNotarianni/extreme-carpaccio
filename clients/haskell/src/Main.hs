@@ -42,7 +42,7 @@ main = scotty 8000 $ do
       Just x -> return x
       Nothing -> fail "no feedback"
 
-    trace $ show (f :: Feedback)
+    trace (f :: Feedback)
     html "Thanx for this very usefull feedback"
 
   post "/order" $ do
@@ -51,13 +51,13 @@ main = scotty 8000 $ do
       Just x -> return x
       Nothing -> fail "no order"
 
-    trace $ show (o :: Order)
+    trace (o :: Order)
 
     let answer = computeTotal o
 
-    trace $ show answer
+    trace answer
 
     raw $ encode $ answer
 
-trace :: MonadIO m => String -> m ()
+trace :: (Show a, MonadIO m) => a -> m ()
 trace = liftIO . print
