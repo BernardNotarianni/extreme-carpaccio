@@ -5,7 +5,7 @@ data Order = Order
     { prices :: [Double]
     , quantities :: [Integer]
     , country :: String
-    , reduction :: String
+    , reductionCode :: String
     } deriving (Show)
 
 data Quantity = Quantity
@@ -13,17 +13,19 @@ data Quantity = Quantity
 
 computeTotal :: Order -> Quantity
 computeTotal order =
-  Quantity total
+  Quantity totalWithReduction
   where
-    basket = zip (prices order) (quantities order)
-    t = vat (country order) / 100.0
-    beforeReduc = sum ([p * fromInteger(q) | (p,q) <- basket]) * (1+t)
-    total = round100 $ beforeReduc `withReduction` reduction order
+    basket =  prices order `zip` quantities order
+    totalWithoutVat = sum ([p * fromInteger(q) | (p,q) <- basket])
+    vat = totalWithoutVat * vatRate (country order) / 100.0
+    totalWithVat = totalWithoutVat + vat
+    totalWithReduction = round100 $ totalWithVat `applyReduction` (reductionCode order)
 
 
-withReduction :: Double -> String -> Double
-withReduction amount "HALF PRICE" = amount / 2.0
-withReduction amount _ = amount * (1 - (standardReduction amount)/100.0)
+
+applyReduction :: Double -> String -> Double
+applyReduction amount "HALF PRICE" = amount / 2.0
+applyReduction amount _ = amount * (1 - (standardReduction amount)/100.0)
 
 standardReduction :: Double -> Double
 standardReduction total
@@ -37,33 +39,33 @@ standardReduction total
 round100 :: Double -> Double
 round100 x = (fromInteger $ round $ x * 100) / (100.0)
 
-vat :: String -> Double
-vat "DE" = 20
-vat "UK" = 21
-vat "FR" = 20
-vat "IT" = 25
-vat "ES" = 19
-vat "PL" = 21
-vat "RO" = 20
-vat "NL" = 20
-vat "BE" = 24
-vat "EL" = 20
-vat "CZ" = 19
-vat "PT" = 23
-vat "HU" = 27
-vat "SE" = 23
-vat "AT" = 22
-vat "BG" = 21
-vat "DK" = 21
-vat "FI" = 17
-vat "SK" = 18
-vat "IE" = 21
-vat "HR" = 23
-vat "LT" = 23
-vat "SI" = 24
-vat "LV" = 20
-vat "EE" = 22
-vat "CY" = 21
-vat "LU" = 25
-vat "MT" = 20
-vat _    = 0.0
+vatRate :: String -> Double
+vatRate "DE" = 20
+vatRate "UK" = 21
+vatRate "FR" = 20
+vatRate "IT" = 25
+vatRate "ES" = 19
+vatRate "PL" = 21
+vatRate "RO" = 20
+vatRate "NL" = 20
+vatRate "BE" = 24
+vatRate "EL" = 20
+vatRate "CZ" = 19
+vatRate "PT" = 23
+vatRate "HU" = 27
+vatRate "SE" = 23
+vatRate "AT" = 22
+vatRate "BG" = 21
+vatRate "DK" = 21
+vatRate "FI" = 17
+vatRate "SK" = 18
+vatRate "IE" = 21
+vatRate "HR" = 23
+vatRate "LT" = 23
+vatRate "SI" = 24
+vatRate "LV" = 20
+vatRate "EE" = 22
+vatRate "CY" = 21
+vatRate "LU" = 25
+vatRate "MT" = 20
+vatRate _    = 0.0
